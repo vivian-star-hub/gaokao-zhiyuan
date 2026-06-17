@@ -184,3 +184,178 @@ footer {
   font-size: 13px;
 }
 footer a { color: #2a5298; }
+
+/* ============================================================
+   学校查询 Tab 样式
+   ============================================================ */
+.school-count {
+  margin: 12px 0;
+  color: #2a5298;
+  font-weight: 500;
+}
+
+.school-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.school-card {
+  background: #fff;
+  border: 1px solid #e1e8ed;
+  border-radius: 8px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.school-card:hover {
+  border-color: #2a5298;
+  box-shadow: 0 2px 8px rgba(42,82,152,0.12);
+  transform: translateY(-2px);
+}
+.school-card h4 {
+  margin: 0 0 6px;
+  color: #1a3a6e;
+  font-size: 15px;
+}
+.school-card .meta {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #8898a8;
+}
+.school-card .trend-mini {
+  margin: 0;
+  font-size: 12px;
+  color: #555;
+  display: flex;
+  gap: 12px;
+}
+
+.badge-mini {
+  display: inline-block;
+  background: #ff6b6b;
+  color: #fff;
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.school-detail {
+  background: #f8fafc;
+  border-left: 4px solid #2a5298;
+  border-radius: 6px;
+  padding: 20px;
+  margin-top: 16px;
+}
+.school-detail h3 {
+  margin: 0 0 8px;
+  color: #1a3a6e;
+  font-size: 22px;
+}
+.school-detail .school-meta {
+  margin: 0 0 16px;
+  color: #555;
+  font-size: 14px;
+}
+.school-intro {
+  line-height: 1.7;
+  color: #333;
+  margin: 12px 0;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 6px;
+  vertical-align: middle;
+  color: #fff;
+}
+.badge-985 { background: #c0392b; }
+.badge-211 { background: #16a085; }
+.badge-df { background: #2980b9; }
+
+.tag {
+  display: inline-block;
+  background: #ecf0f1;
+  color: #555;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-right: 4px;
+}
+
+.trend-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  background: #fff;
+}
+.trend-table th,
+.trend-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e1e8ed;
+  text-align: center;
+}
+.trend-table th {
+  background: #2a5298;
+  color: #fff;
+  font-weight: 500;
+}
+
+.level-tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: #fff;
+}
+.level-zhuan { background: #e67e22; }   /* 橙色 - 专科 */
+.level-zhiye { background: #16a085; }  /* 绿色 - 职业本科 */
+.level-ben { background: #34495e; }     /* 灰色 - 普通本科 */
+
+.cat-tag {
+  display: inline-block;
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: #ecf0f1;
+  color: #555;
+  margin-left: 4px;
+}
+
+.policy-block {
+  background: #f8fafc;
+  border-left: 4px solid #2a5298;
+  padding: 14px 18px;
+  margin: 14px 0;
+  border-radius: 4px;
+}
+.policy-block h4 {
+  margin: 0 0 8px;
+  color: #1a3a6e;
+}
+.policy-block ul {
+  margin: 0;
+  padding-left: 20px;
+}
+.policy-block li {
+  margin: 4px 0;
+  line-height: 1.6;
+}
+
+.badge-zhuan { background: #e67e22; }
+
+.zhuan-rank {
+  display: inline-block;
+  background: #e67e22;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  margin-left: 4px;
+}
