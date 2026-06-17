@@ -21,6 +21,8 @@
     <button class="tab" data-tab="lines">批次线</button>
     <button class="tab" data-tab="table">一分一段</button>
     <button class="tab" data-tab="status">数据状态</button>
+    <button class="tab" data-tab="schools">学校查询</button>
+    <button class="tab" data-tab="policy">志愿政策</button>
     <button class="tab" data-tab="importer">数据导入</button>
     <button class="tab" data-tab="about">关于</button>
   </nav>
@@ -119,24 +121,21 @@
     <!-- 选科匹配 -->
     <section id="subjects" class="panel">
       <h2>选科匹配（3+3 模式）</h2>
-      <p class="hint">输入你的 3 门选考科目（首选 1 门 + 再选 2 门），筛选可报考的院校专业组。</p>
+      <p class="hint">输入你的 3 门选考科目（首选 1 门 + 再选 0-3 门），筛选可报考的院校专业组。</p>
       <div class="form">
-        <label>首选科目
-          <select id="subj-first">
-            <option>物理</option><option>历史</option>
-          </select>
+        <label><strong>首选科目（1 选 1）</strong>
+          <div class="subj-radio">
+            <label class="radio-label"><input type="radio" name="subj-first" value="物理" checked> 物理</label>
+            <label class="radio-label"><input type="radio" name="subj-first" value="历史"> 历史</label>
+          </div>
         </label>
-        <label>再选 1
-          <select id="subj-re1">
-            <option>化学</option><option>生物</option>
-            <option>政治</option><option>地理</option>
-          </select>
-        </label>
-        <label>再选 2
-          <select id="subj-re2">
-            <option>生物</option><option>化学</option>
-            <option>政治</option><option>地理</option>
-          </select>
+        <label><strong>再选科目（0-3 选）</strong>
+          <div class="subj-check">
+            <label class="check-label"><input type="checkbox" name="subj-re" value="化学"> 化学</label>
+            <label class="check-label"><input type="checkbox" name="subj-re" value="生物"> 生物</label>
+            <label class="check-label"><input type="checkbox" name="subj-re" value="政治"> 政治</label>
+            <label class="check-label"><input type="checkbox" name="subj-re" value="地理"> 地理</label>
+          </div>
         </label>
         <label>参考年份
           <select id="subj-year">
@@ -216,6 +215,34 @@
     <section id="status" class="panel">
       <h2>数据核验状态</h2>
       <div id="status-result" class="result"></div>
+    </section>
+
+    <!-- 学校查询 -->
+    <section id="schools" class="panel">
+      <h2>学校查询（2228 所 + 5 年录取线）</h2>
+      <p class="hint">输入校名搜索（如“北京大学”“山东大学”“潍坊职业”）。包含 41 所热门本科简介 + 本科/专科全覆盖。</p>
+      <div class="form">
+        <label>学校名
+          <input type="text" id="sch-kw" placeholder="例如：北京大学 / 烟台 / 职业技术学院">
+        </label>
+        <label>过滤
+          <div class="subj-check">
+            <label class="check-label"><input type="checkbox" id="sch-985"> 985</label>
+            <label class="check-label"><input type="checkbox" id="sch-211"> 211</label>
+            <label class="check-label"><input type="checkbox" id="sch-double"> 双一流</label>
+            <label class="check-label"><input type="checkbox" id="sch-zhuan"> 仅高职/专科</label>
+          </div>
+        </label>
+        <button id="sch-btn" class="btn">搜索</button>
+      </div>
+      <div id="sch-list" class="result"></div>
+    </section>
+
+    <!-- 志愿政策 -->
+    <section id="policy" class="panel">
+      <h2>2026 山东夏季高考志愿政策</h2>
+      <p class="hint">来源于 sdzk.cn 官方文件（NewsID=7200，2026-05-15）。这里只抓最关键的 6 个点。</p>
+      <div id="policy-result" class="result"></div>
     </section>
 
     <!-- 数据导入 -->
