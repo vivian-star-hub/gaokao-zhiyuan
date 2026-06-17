@@ -1,0 +1,22 @@
+{
+  "version": "2026-06-17",
+  "years": [
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "files": {
+    "2021": "data/toudang-2021.json",
+    "2022": "data/toudang-2022.json",
+    "2023": "data/toudang-2023.json",
+    "2024": "data/toudang-2024.json",
+    "2025": "data/toudang-2025.json"
+  },
+  "schema": {
+    "物理": "list of { majorName, schoolCode, schoolName, planCount, minRank }",
+    "历史": "list of { majorName, schoolCode, schoolName, planCount, minRank }",
+    "meta": "{ year, source, newsids, fetchedAt, note }"
+  }
+}

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>山东高考志愿填报指导手册</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>🎓 山东高考志愿填报指导手册</h1>
+    <p class="subtitle">2021-2025 录取数据 · 一分一段表 · 智能位次查询</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="lookup">位次查询</button>
+    <button class="tab" data-tab="equivalent">等位分</button>
+    <button class="tab" data-tab="rush">冲稳保</button>
+    <button class="tab" data-tab="subjects">选科匹配</button>
+    <button class="tab" data-tab="trend">趋势对比</button>
+    <button class="tab" data-tab="lines">批次线</button>
+    <button class="tab" data-tab="table">一分一段</button>
+    <button class="tab" data-tab="status">数据状态</button>
+    <button class="tab" data-tab="importer">数据导入</button>
+    <button class="tab" data-tab="about">关于</button>
+  </nav>
+
+  <main>
+    <!-- 位次查询 -->
+    <section id="lookup" class="panel active">
+      <h2>分数 ↔ 位次 互查</h2>
+      <div class="form">
+        <label>年份
+          <select id="lookup-year">
+            <option>2025</option><option>2024</option><option>2023</option>
+            <option>2022</option><option>2021</option>
+          </select>
+        </label>
+        <label>科类
+          <select id="lookup-category">
+            <option>物理</option><option>历史</option>
+          </select>
+        </label>
+        <label>分数
+          <input type="number" id="lookup-score" min="0" max="750" placeholder="例如 580">
+        </label>
+        <button id="lookup-btn">查询位次</button>
+      </div>
+      <div id="lookup-result" class="result"></div>
+    </section>
+
+    <!-- 等位分换算 -->
+    <section id="equivalent" class="panel">
+      <h2>等位分换算</h2>
+      <p class="hint">输入基准年分数，自动换算成其他年份相同位次对应的"等效分数"。</p>
+      <p class="hint">例如："我今年考了 580 分，相当于去年多少分？"</p>
+      <div class="form">
+        <label>基准年份
+          <select id="eq-base-year">
+            <option>2025</option><option>2024</option><option>2023</option>
+            <option>2022</option><option>2021</option>
+          </select>
+        </label>
+        <label>科类
+          <select id="eq-category">
+            <option>物理</option><option>历史</option>
+          </select>
+        </label>
+        <label>分数
+          <input type="number" id="eq-score" min="0" max="750" placeholder="例如 580">
+        </label>
+        <button id="eq-btn">换算</button>
+      </div>
+      <div id="eq-result" class="result"></div>
+    </section>
+
+    <!-- 冲稳保 -->
+    <section id="rush" class="panel">
+      <h2>冲稳保推荐（位次法）</h2>
+      <p class="hint">输入分数和科类，系统按位次在三个档位筛选院校。位次越小越靠前，门槛越高。</p>
+      <div class="form">
+        <label>参考年份
+          <select id="rush-year">
+            <option>2025</option><option>2024</option><option>2023</option>
+            <option>2022</option><option>2021</option>
+          </select>
+        </label>
+        <label>科类
+          <select id="rush-category">
+            <option>物理</option><option>历史</option>
+          </select>
+        </label>
+        <label>分数
+          <input type="number" id="rush-score" min="0" max="750" placeholder="例如 600">
+        </label>
+        <button id="rush-btn">推荐</button>
+      </div>
+      <div class="form" style="margin-top:-8px">
+        <label>冲（位次小）
+          <input type="number" id="rush-lo" value="1000" min="0" step="500">
+        </label>
+        <label>冲（位次大）
+          <input type="number" id="rush-hi" value="5000" min="0" step="500">
+        </label>
+        <label>稳上限
+          <input type="number" id="stable-hi" value="1000" min="0" step="500">
+        </label>
+        <label>保上限
+          <input type="number" id="safe-hi" value="8000" min="0" step="500">
+        </label>
+        <label>保下限
+          <input type="number" id="safe-lo" value="2000" min="0" step="500">
+        </label>
+        <span class="hint" style="align-self:end">（位次偏移：冲=高排名、稳=同位次附近、保=低排名）</span>
+      </div>
+      <div id="rush-result" class="result"></div>
+    </section>
+
+    <!-- 选科匹配 -->
+    <section id="subjects" class="panel">
+      <h2>选科匹配（3+3 模式）</h2>
+      <p class="hint">输入你的 3 门选考科目（首选 1 门 + 再选 2 门），筛选可报考的院校专业组。</p>
+      <div class="form">
+        <label>首选科目
+          <select id="subj-first">
+            <option>物理</option><option>历史</option>
+          </select>
+        </label>
+        <label>再选 1
+          <select id="subj-re1">
+            <option>化学</option><option>生物</option>
+            <option>政治</option><option>地理</option>
+          </select>
+        </label>
+        <label>再选 2
+          <select id="subj-re2">
+            <option>生物</option><option>化学</option>
+            <option>政治</option><option>地理</option>
+          </select>
+        </label>
+        <label>参考年份
+          <select id="subj-year">
+            <option>2025</option><option>2024</option><option>2023</option>
+            <option>2022</option><option>2021</option>
+          </select>
+        </label>
+        <label>院校名（可选）
+          <input type="text" id="subj-school" placeholder="例如：山大">
+        </label>
+        <button id="subj-btn">匹配</button>
+      </div>
+      <div id="subj-result" class="result"></div>
+    </section>
+
+    <!-- 趋势对比 -->
+    <section id="trend" class="panel">
+      <h2>多年度趋势对比</h2>
+      <p class="hint">输入院校名称与科类，查看该校 2021-2025 五年的投档线/位次走势（轻量 SVG 折线图，无外部依赖）。</p>
+      <div class="form">
+        <label>院校名称
+          <input type="text" id="trend-school" placeholder="例如：山东大学" value="山东大学">
+        </label>
+        <label>科类
+          <select id="trend-category">
+            <option>物理</option><option>历史</option>
+          </select>
+        </label>
+        <label>年份
+          <select id="trend-year">
+            <option value="all">2021-2025 全部</option>
+            <option>2025</option><option>2024</option><option>2023</option>
+            <option>2022</option><option>2021</option>
+          </select>
+        </label>
+        <button id="trend-btn">查询</button>
+      </div>
+      <div id="trend-result" class="result"></div>
+    </section>
+
+    <!-- 批次线 -->
+    <section id="lines" class="panel">
+      <h2>批次控制线</h2>
+      <div class="form">
+        <label>年份
+          <select id="lines-year">
+            <option>2025</option><option>2024</option><option>2023</option>
+            <option>2022</option><option>2021</option>
+          </select>
+        </label>
+        <button id="lines-btn">查询</button>
+      </div>
+      <div id="lines-result" class="result"></div>
+    </section>
+
+    <!-- 一分一段 -->
+    <section id="table" class="panel">
+      <h2>一分一段表</h2>
+      <div class="form">
+        <label>年份
+          <select id="table-year">
+            <option>2025</option><option>2024</option><option>2023</option>
+            <option>2022</option><option>2021</option>
+          </select>
+        </label>
+        <label>科类
+          <select id="table-category">
+            <option>物理</option><option>历史</option>
+          </select>
+        </label>
+        <button id="table-btn">加载</button>
+      </div>
+      <div id="table-result" class="result"></div>
+    </section>
+
+    <!-- 数据状态 -->
+    <section id="status" class="panel">
+      <h2>数据核验状态</h2>
+      <div id="status-result" class="result"></div>
+    </section>
+
+    <!-- 数据导入 -->
+    <section id="importer" class="panel">
+      <h2>本地数据导入 / 解析工具</h2>
+      <p>用于以本地 .xls / .xlsx 文件生成可上传的 JSON（运行完全在浏览器内，不上传任何文件）。</p>
+
+      <div class="form-row">
+        <label>类型：
+          <select id="imp-type">
+            <option value="auto">自动识别（推荐）</option>
+            <option value="yfdydb">一分一段表</option>
+            <option value="toudang">普通类投档表</option>
+            <option value="plan">院校专业计划</option>
+            <option value="artsports">艺术类 / 体育类投档表</option>
+          </select>
+        </label>
+        <label>年份：
+          <input id="imp-year" type="number" placeholder="如 2025" min="2020" max="2099" style="width:80px">
+        </label>
+      </div>
+
+      <div class="form-row">
+        <input id="imp-file" type="file" accept=".xls,.xlsx">
+      </div>
+
+      <div id="imp-result" class="result"></div>
+
+      <h3 style="margin-top:20px">📖 使用说明</h3>
+      <ol style="line-height:1.7">
+        <li>从 <a href="http://www.sdzk.cn/" target="_blank">sdzk.cn</a> 下载原始 .xls 文件（无需手动预处理）</li>
+        <li>选择类型（默认“自动识别”）和年份（自动推断）</li>
+        <li>点击下方“下载转换后的 JSON”</li>
+        <li>将生成的 JSON 覆盖到 <code>data/</code> 目录，重载页面</li>
+      </ol>
+
+      <p style="margin-top:16px"><strong>⚠️ 作用</strong>：本工具让“非技术用户”也能更新本项目的数据，避免动手写代码。本项目本身提供 <code>import.py</code>（Python 版本，适用于本地批量处理）。</p>
+    </section>
+
+    <!-- 关于 -->
+    <section id="about" class="panel">
+      <h2>关于本项目</h2>
+      <p>本项目为山东新高考（3+3 模式）志愿填报指导手册的网页版。</p>
+      <p><strong>数据来源</strong>：山东省教育考试院 <a href="http://www.sdzk.cn/" target="_blank">sdzk.cn</a></p>
+      <p><strong>使用须知</strong>：所有数据需对照官方公告逐条核验后再用于实际填报。</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>⚠️ 数据为占位骨架，正式使用前请从山东省教育考试院逐年核验</p>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/importer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</body>
+</html>
