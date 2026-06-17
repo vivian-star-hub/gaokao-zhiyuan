@@ -5591,7 +5591,13 @@ const SD_ADMISSION_DATA = {
     2023: { verified: "pending", source: null, records: [] },
     2022: { verified: "pending", source: null, records: [] },
     2021: { verified: "pending", source: null, records: [] }
-  }
+  },
+
+  // ============================================================
+  // 院校信息表（2228 所 + 5 年录取线聚合 + 41 所精选简介）
+  // 通过 loadSchoolsInfo() 异步加载
+  // ============================================================
+  schoolsInfo: {}
 };
 
 // ============================================================
@@ -5841,7 +5847,8 @@ function dataStatusBar(items) {
 // ============================================================
 const _toudangCache = {};  // {year: Promise<data>}
 let _plansCache = null;  // 一次性加载全 5 年 plans
-let _artsportsCache = null;  // 一次性加载全 5 年 艺体
+let _artsportsCache = null;  // 一次性加载全 5 年艺体
+let _schoolsInfoCache = null;  // 一次性加载院校信息表（2228 所）
 
 /**
  * 异步加载指定年份的投档表
@@ -5957,6 +5964,67 @@ async function loadAllToudang() {
 }
 
 /**
+ * 加载院校信息表（2228 所 + 5 年录取线聚合）
+ */
+async function loadSchoolsInfo() {
+  if (_schoolsInfoCache) return _schoolsInfoCache;
+  _schoolsInfoCache = (async () => {
+    try {
+      const resp = await fetch("data/schools-info.json");
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      SD_ADMISSION_DATA.schoolsInfo = data;
+      const total = Object.keys(data).length;
+      const withIntro = Object.values(data).filter(v => v.intro).length;
+      console.log(`[schools] ${total} 所院校加载完成（其中 ${withIntro} 所带简介）`);
+      return data;
+    } catch (e) {
+      console.error("[schools] 加载失败:", e);
+      return null;
+    }
+  })();
+  return _schoolsInfoCache;
+}
+
+/**
+ * 按名称模糊搜索院校（返回匹配列表）
+ */
+function searchSchools(keyword, opts = {}) {
+  if (!_schoolsInfoCache) return [];
+  const all = SD_ADMISSION_DATA.schoolsInfo || {};
+  const kw = (keyword || "").trim();
+  let results = [];
+  if (kw) {
+    // 优先精确匹配，然后前缀匹配，最后包含
+    const exact = [], prefix = [], contains = [];
+    for (const [name, info] of Object.entries(all)) {
+      if (name === kw) exact.push([name, info]);
+      else if (name.startsWith(kw)) prefix.push([name, info]);
+      else if (name.includes(kw)) contains.push([name, info]);
+    }
+    results = [...exact, ...prefix, ...contains];
+  } else {
+    results = Object.entries(all);
+  }
+  // 过滤选项
+  if (opts.is985) results = results.filter(([_, v]) => v.is985);
+  if (opts.is211) results = results.filter(([_, v]) => v.is211);
+  if (opts.isDoubleFirst) results = results.filter(([_, v]) => v.isDoubleFirst);
+  if (opts.isZhuan) results = results.filter(([_, v]) => v.schoolLevel === '高职(专科)' || v.schoolLevel === '职业本科');
+  if (opts.location) results = results.filter(([_, v]) => v.location && v.location.includes(opts.location));
+  if (opts.limit) results = results.slice(0, opts.limit);
+  return results.map(([name, info]) => ({ name, ...info }));
+}
+
+/**
+ * 获取单所院校详情
+ */
+function getSchoolDetail(name) {
+  const all = SD_ADMISSION_DATA.schoolsInfo || {};
+  return all[name] || null;
+}
+
+/**
  * 兼容旧接口名（部分旧代码可能引用 loadToudang2025）
  */
 async function loadToudang2025() {
@@ -5964,19 +6032,21 @@ async function loadToudang2025() {
 }
 
 if (typeof window !== "undefined") {
-  // 默认预加载最近 2 年投档表 + 5 年 plans + 5 年艺体
+  // 默认预加载最近 2 年投档表 + 5 年 plans + 5 年艺体 + 院校信息表
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", () => {
       loadToudang(2025);
       loadToudang(2024);
       loadPlans();
       loadArtsports();
+      loadSchoolsInfo();
     });
   } else {
     loadToudang(2025);
     loadToudang(2024);
     loadPlans();
     loadArtsports();
+    loadSchoolsInfo();
   }
 }
 
@@ -5997,6 +6067,9 @@ if (typeof window !== "undefined") {
   window.loadToudang2025 = loadToudang2025;
   window.loadPlans = loadPlans;
   window.loadArtsports = loadArtsports;
+  window.loadSchoolsInfo = loadSchoolsInfo;
+  window.searchSchools = searchSchools;
+  window.getSchoolDetail = getSchoolDetail;
   window.queryArtsports = queryArtsports;
 }
 
@@ -6005,6 +6078,6 @@ if (typeof module !== "undefined" && module.exports) {
     SD_ADMISSION_DATA, lookupRank, lookupScoreByRank, getAdmissionLine,
     convertEquivalentScore, recommendByRank, matchBySubjects, getSchoolTrend,
     dataStatus, statusBadge, dataStatusBar, loadToudang, loadAllToudang, loadPlans,
-    loadArtsports, queryArtsports
+    loadArtsports, queryArtsports, loadSchoolsInfo, searchSchools, getSchoolDetail
   };
 }

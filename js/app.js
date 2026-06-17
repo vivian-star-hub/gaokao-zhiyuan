@@ -227,20 +227,16 @@
     `;
   });
 
-  // ----- 选科匹配 -----
+  // ----- 选科匹配（3+3 模式）-----
   document.getElementById("subj-btn").addEventListener("click", async () => {
-    const first = document.getElementById("subj-first").value;
-    const re1 = document.getElementById("subj-re1").value;
-    const re2 = document.getElementById("subj-re2").value;
+    const firstEl = document.querySelector('input[name="subj-first"]:checked');
+    const first = firstEl ? firstEl.value : "物理";
+    const reChecks = Array.from(document.querySelectorAll('input[name="subj-re"]:checked')).map(el => el.value);
     const year = parseInt(document.getElementById("subj-year").value, 10);
     const school = document.getElementById("subj-school").value.trim();
     const out = document.getElementById("subj-result");
 
-    if (re1 === re2) {
-      out.innerHTML = empty("再选两门不能相同");
-      return;
-    }
-    const user = { first, re: [re1, re2] };
+    const user = { first, re: reChecks };
     out.innerHTML = `<div class="hint">⏳ 加载 ${year} 年招生计划...</div>`;
     await loadPlans();
     const r = matchBySubjects(user, { year, schoolName: school || undefined });
@@ -549,5 +545,173 @@
     out.innerHTML = html;
   }
   renderStatus();
+
+  // ----- 学校查询 -----
+  function renderSchoolDetail(school) {
+    const trend5y = school.trend_5y || { 物理: {}, 历史: {} };
+    const years = ["2021", "2022", "2023", "2024", "2025"];
+    const renderRank = (y) => {
+      const v = trend5y.物理[y] ?? trend5y.历史[y];
+      return v != null ? `#${v.toLocaleString()}` : "-";
+    };
+    const tagHtml = (school.tags || []).map(t => `<span class="tag">${t}</span>`).join("");
+    const badges = [];
+    if (school.is985) badges.push('<span class="badge badge-985">985</span>');
+    if (school.is211) badges.push('<span class="badge badge-211">211</span>');
+    if (school.isDoubleFirst) badges.push('<span class="badge badge-df">双一流</span>');
+    if (school.schoolLevel === '高职(专科)' || school.schoolLevel === '职业本科') {
+      badges.push('<span class="badge badge-zhuan">专科</span>');
+    }
+    const introHtml = school.intro
+      ? `<p class="school-intro">${school.intro}</p>`
+      : `<p class="hint">该学校暂未收录简介。查看 5 年录取线作为参考。</p>`;
+    const majorsHtml = school.strongMajors && school.strongMajors.length
+      ? `<p><strong>强势专业：</strong>${school.strongMajors.join("、")}</p>`
+      : "";
+    const subjectsHtml = school.subjects_5y && school.subjects_5y.length
+      ? `<p><strong>5 年选科要求：</strong>${school.subjects_5y.join(" | ")}</p>`
+      : "";
+    const tuitionHtml = school.tuition_range && school.tuition_range[0]
+      ? `<p><strong>学费范围：</strong>${school.tuition_range[0].toLocaleString()} - ${school.tuition_range[1].toLocaleString()} 元/年</p>`
+      : "";
+
+    // 5 年位次表格
+    const trendRows = years.map(y => {
+      const wl = trend5y.物理[y];
+      const lz = trend5y.历史[y];
+      return `<tr>
+        <td>${y}</td>
+        <td>${wl != null ? "#" + wl.toLocaleString() : "-"}</td>
+        <td>${lz != null ? "#" + lz.toLocaleString() : "-"}</td>
+      </tr>`;
+    }).join("");
+
+    // 专科位次块
+    const zhuanHtml = school.zhuan_min_rank_2025
+      ? `<h4>2025 专科批录取数据</h4>
+         <p>最低位次：<strong>#${school.zhuan_min_rank_2025.toLocaleString()}</strong> · 计划数：<strong>${(school.zhuan_plans_2025 || 0).toLocaleString()}</strong> 个</p>
+         <p class="hint">注：以上为 2025 年普通类常规批第 2 次志愿投档数据（实际位次）。专科批考生可参考。</p>`
+      : "";
+
+    return `
+      <div class="school-detail">
+        <h3>${school.name} ${badges.join(" ")}</h3>
+        <p class="school-meta">
+          <span class="level-tag ${school.schoolLevel === '高职(专科)' ? 'level-zhuan' : school.schoolLevel === '职业本科' ? 'level-zhiye' : 'level-ben'}">${school.schoolLevel || school.level}</span>
+          ${school.category ? `<span class="cat-tag">${school.category}</span>` : ''}
+          <span>${school.location || "未知地区"}</span>
+          ${tagHtml ? " · " + tagHtml : ""}
+        </p>
+        ${introHtml}
+        ${majorsHtml}
+        ${subjectsHtml}
+        ${tuitionHtml}
+        ${zhuanHtml}
+        <h4>5 年本科录取最低位次（物理 / 历史）</h4>
+        <table class="trend-table">
+          <thead><tr><th>年份</th><th>物理类</th><th>历史类</th></tr></thead>
+          <tbody>${trendRows}</tbody>
+        </table>
+        <p class="hint">注：上表为该院校 <strong>最低位次</strong>（所有专业组中的最小值）。同分多专业组会导致同一名次多院校。</p>
+      </div>
+    `;
+  }
+
+  async function searchAndRender() {
+    const out = document.getElementById("sch-list");
+    const kw = document.getElementById("sch-kw").value.trim();
+    const is985 = document.getElementById("sch-985").checked;
+    const is211 = document.getElementById("sch-211").checked;
+    const isDoubleFirst = document.getElementById("sch-double").checked;
+    const isZhuan = document.getElementById("sch-zhuan").checked;
+
+    out.innerHTML = `<div class="hint">⏳ 加载院校信息表...</div>`;
+    await loadSchoolsInfo();
+
+    if (!kw && !is985 && !is211 && !isDoubleFirst && !isZhuan) {
+      out.innerHTML = `<div class="warn">请输入学校名或选择过滤条件。</div>`;
+      return;
+    }
+
+    const results = searchSchools(kw, { is985, is211, isDoubleFirst, isZhuan, limit: 50 });
+    if (results.length === 0) {
+      out.innerHTML = `<div class="warn">未找到匹配的院校。试试其他关键词。</div>`;
+      return;
+    }
+
+    // 默认展示第一个详情，下面是列表
+    let html = `<div class="school-count">共找到 <strong>${results.length}</strong> 所院校</div>`;
+    html += `<div class="school-list">`;
+    for (const s of results) {
+      const badges = [];
+      if (s.is985) badges.push('<span class="badge-mini">985</span>');
+      if (s.is211) badges.push('<span class="badge-mini">211</span>');
+      if (s.isDoubleFirst) badges.push('<span class="badge-mini">双一流</span>');
+      const trendWl = s.trend_5y?.物理?.["2025"];
+      const trendLz = s.trend_5y?.历史?.["2025"];
+      const zhuanRank = s.zhuan_min_rank_2025;
+      html += `
+        <div class="school-card" data-name="${s.name}">
+          <h4>${s.name} ${badges.join(" ")}</h4>
+          <p class="meta">
+            <span class="level-tag ${s.schoolLevel === '高职(专科)' ? 'level-zhuan' : s.schoolLevel === '职业本科' ? 'level-zhiye' : 'level-ben'}">${s.schoolLevel || s.level}</span>
+            ${s.category ? `<span class="cat-tag">${s.category}</span>` : ''}
+            ${s.location ? `· ${s.location}` : ''}
+          </p>
+          <p class="trend-mini">
+            ${trendWl != null || trendLz != null ? `<span>本科 物理：${trendWl != null ? "#" + trendWl.toLocaleString() : "-"}</span><span>历史：${trendLz != null ? "#" + trendLz.toLocaleString() : "-"}</span>` : ''}
+            ${zhuanRank ? `<span class="zhuan-rank">专科：#${zhuanRank.toLocaleString()}</span>` : ''}
+          </p>
+        </div>
+      `;
+    }
+    html += `</div>`;
+    html += `<div id="sch-detail">${renderSchoolDetail(results[0])}</div>`;
+    out.innerHTML = html;
+
+    // 点击卡片显示详情
+    out.querySelectorAll(".school-card").forEach(card => {
+      card.addEventListener("click", () => {
+        const name = card.getAttribute("data-name");
+        const detail = getSchoolDetail(name);
+        if (detail) {
+          const detailDiv = document.getElementById("sch-detail");
+          detailDiv.innerHTML = renderSchoolDetail(detail);
+          detailDiv.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      });
+    });
+  }
+
+  document.getElementById("sch-btn").addEventListener("click", searchAndRender);
+  document.getElementById("sch-kw").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") searchAndRender();
+  });
+
+  // ----- 志愿政策 -----
+  async function renderPolicy() {
+    const out = document.getElementById("policy-result");
+    out.innerHTML = `<div class="hint">⏳ 加载中...</div>`;
+    try {
+      const resp = await fetch("data/policy-2026-summer.json");
+      if (!resp.ok) throw new Error("加载失败");
+      const data = await resp.json();
+      let html = `<h3>${data.title}</h3>`;
+      html += `<p class="meta">发布日期：${data.date} · <a href="${data.url}" target="_blank">原文链接</a></p>`;
+      for (const part of data.keyPoints) {
+        html += `<div class="policy-block"><h4>${part.title}</h4><ul>`;
+        for (const item of part.items) {
+          // **...** 转 <strong>...</strong>
+          item = item.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+          html += `<li>${item}</li>`;
+        }
+        html += `</ul></div>`;
+      }
+      out.innerHTML = html;
+    } catch (e) {
+      out.innerHTML = `<div class="warn">政策文档加载失败：${e.message}</div>`;
+    }
+  }
+  renderPolicy();
 
 })();
